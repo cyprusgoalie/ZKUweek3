@@ -239,6 +239,16 @@ const encrypt = async (
 ): Promise<Ciphertext> => {
   const mimc7 = await buildMimc7();
   // [assignment] generate the IV, use Mimc7 to hash the shared key with the IV, then encrypt the plain text
+  
+  // mimc7.multiHash() returns an array, but we want to work with bigint types. We can't directly cast an array using BigInt
+  // so we have to use buf2Bigint to cast the components of the array to BigInt
+  const iv = buf2Bigint(mimc7.multiHash(plaintext, BigInt(0)));
+  
+  // determining the ciphertext from the shared key and IV
+  const ciphertext: Ciphertext = {iv, data: plaintext.map((e: bigint, i: number): bigint => {return e + buf2Bigint(mimc7.hash(sharedKey, iv + BigInt(i)))})};
+
+  // returning the ciphertext
+  return ciphertext;
 };
 
 /*
@@ -250,6 +260,13 @@ const decrypt = async (
   sharedKey: EcdhSharedKey,
 ): Promise<Plaintext> => {
   // [assignment] use Mimc7 to hash the shared key with the IV, then descrypt the ciphertext
+    const mimc7 = await buildMimc7();
+    
+    // extracting the plaintext. Once again, we need to use buf2Bigint to cast the returned array from Mimc7's hash function
+    const plaintext: Plaintext = ciphertext.data.map((e: bigint, i: number): bigint => {return e - buf2Bigint(mimc7.hash(sharedKey, ciphertext.iv + BigInt(i)))});
+
+    // returning the decrypted plaintext
+    return plaintext;
 };
 
 export {
