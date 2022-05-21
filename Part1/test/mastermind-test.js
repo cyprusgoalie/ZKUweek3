@@ -17,21 +17,26 @@ describe("Mastermind Variation test", function () {
     let poseidon;
     let F;
 
+    // increased the timeout amount so that things execute on a lower spec machine
     this.timeout(100000000);
 
+    // our first test
     it("Should pass, all 5 guesses are correct, 5 hits", async () => {
         poseidon = await buildPoseidon();
         F = poseidon.F;
 
+        // our solutions will be 1,2,3,4,5
         const privSolnA = 1;
         const privSolnB = 2;
         const privSolnC = 3;
         const privSolnD = 4;
         const privSolnE = 5;
 
+        // generating some random int as out salt
         const privSalt = Math.floor(Math.random()*10**10);
         //console.log(privSalt);
 
+        // computing our poseidon hash of the salt and solutions
         const pubSolnHash = poseidon([privSalt,privSolnA,privSolnB,privSolnC,privSolnD,privSolnE]);
         //console.log(pubSolnHash);
         //console.log(F.toObject(pubSolnHash));
@@ -39,6 +44,7 @@ describe("Mastermind Variation test", function () {
         const circuit = await wasm_tester("contracts/circuits/MastermindVariation.circom");
         await circuit.loadConstraints();
 
+        // this input corresponds to all correct guesses and gives 5 hits
         const INPUT = {
             "pubGuessA": 1,
             "pubGuessB": 2,
@@ -62,19 +68,23 @@ describe("Mastermind Variation test", function () {
     });
 
 
+    // here all guesses should be wrong
     it("Should pass, all 5 guesses are wrong, 0 hits, 0 blows", async () => {
         poseidon = await buildPoseidon();
         F = poseidon.F;
 
+        // our solutions will be 1,2,3,4,5
         const privSolnA = 1;
         const privSolnB = 2;
         const privSolnC = 3;
         const privSolnD = 4;
         const privSolnE = 5;
 
+        // generating some random int as out salt
         const privSalt = Math.floor(Math.random()*10**10);
         //console.log(privSalt);
 
+        // computing our poseidon hash of the salt and solutions
         const pubSolnHash = poseidon([privSalt,privSolnA,privSolnB,privSolnC,privSolnD,privSolnE]);
         //console.log(pubSolnHash);
         //console.log(F.toObject(pubSolnHash));
@@ -82,6 +92,7 @@ describe("Mastermind Variation test", function () {
         const circuit = await wasm_tester("contracts/circuits/MastermindVariation.circom");
         await circuit.loadConstraints();
 
+        // all of our guesses are wrong, and we have 0 hits and 0 blows
         const INPUT = {
             "pubGuessA": 6,
             "pubGuessB": 7,
@@ -105,19 +116,23 @@ describe("Mastermind Variation test", function () {
     });
 
 
+    // here two of our guesses will be correct, but in the wrong sequence (i.e. 0 hits, 2 blows)
     it("Should pass, 2 guesses are correct, but wrong position (2 Blows)", async () => {
         poseidon = await buildPoseidon();
         F = poseidon.F;
 
+        // our solutions will be 1,2,3,4,5
         const privSolnA = 1;
         const privSolnB = 2;
         const privSolnC = 3;
         const privSolnD = 4;
         const privSolnE = 5;
 
+        // generating some random int as out salt
         const privSalt = Math.floor(Math.random()*10**10);
         //console.log(privSalt);
 
+        // computing our poseidon hash of the salt and solutions
         const pubSolnHash = poseidon([privSalt,privSolnA,privSolnB,privSolnC,privSolnD,privSolnE]);
         //console.log(pubSolnHash);
         //console.log(F.toObject(pubSolnHash));
@@ -125,6 +140,8 @@ describe("Mastermind Variation test", function () {
         const circuit = await wasm_tester("contracts/circuits/MastermindVariation.circom");
         await circuit.loadConstraints();
 
+        // our correct guesses but incorrect positions (i.e. 2 blows) are given by 2 and 3.
+        // the other guesses are incorrect
         const INPUT = {
             "pubGuessA": 2,
             "pubGuessB": 3,
